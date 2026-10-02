@@ -8,11 +8,14 @@ FROM python:3.12-alpine
 WORKDIR /app
 RUN apk add --no-cache postgresql-libs
 COPY --from=builder /install /usr/local
-COPY . .
+RUN addgroup -S appgroup \
+    && adduser -S appuser -G appgroup
+COPY --chown=appuser:appgroup . .
 
 ENV PORT=8003
 
 EXPOSE 8003
+USER appuser
 
 CMD ["python", "app.py"]
 
