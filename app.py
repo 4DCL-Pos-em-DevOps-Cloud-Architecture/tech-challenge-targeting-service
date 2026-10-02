@@ -2,7 +2,6 @@ import os
 import sys
 import psycopg2
 import requests
-import json
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.pool import SimpleConnectionPool
 from flask import Flask, request, jsonify
