@@ -91,3 +91,31 @@ curl -X PUT http://localhost:8003/rules/enable-new-dashboard \
 }'
 ```
 Saída esperada: (O JSON da regra atualizada, com `"value": 75`).
+
+## Manifestos Kubernetes
+
+Os manifestos deste serviço estão em `k8s/`. O serviço é publicado pelo Ingress na rota `/rules`.
+
+Antes da aplicação, substitua os seguintes valores:
+
+| Placeholder | Descrição |
+|---|---|
+| `<REGISTRY_URL>` | URI do registro ECR, por exemplo `123456789012.dkr.ecr.us-east-1.amazonaws.com` |
+| `<BASE64_ENCODED_DATABASE_URL>` | `DATABASE_URL` codificada em Base64 |
+| `<URL_DA_FILA_SQS>` | URL da fila SQS, caso utilizada pelo ambiente |
+
+Não versione valores reais de Secrets no repositório.
+
+Aplicação dos recursos:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/jobs/db-schema-init-job.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/ingress.yaml
+```
+
+O endpoint externo fica disponível em `/rules`. O health check interno é `/health` na porta `8003`.
