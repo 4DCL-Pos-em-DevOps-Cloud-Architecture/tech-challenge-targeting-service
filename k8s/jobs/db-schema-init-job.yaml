@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-schema-init
+  namespace: targeting-service
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: db-schema-init
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-schema-init
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TARGETING_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: targeting-secrets
+                  key: DATABASE_URL
+          command:
+            - sh
+            - -ec
+            - |
+              psql "$TARGETING_DATABASE_URL" -v ON_ERROR_STOP=1 -f /schemas/targeting-init.sql
+          volumeMounts:
+            - name: db-init-sql
+              mountPath: /schemas
+              readOnly: true
+      volumes:
+        - name: db-init-sql
+          configMap:
+            name: configmap
